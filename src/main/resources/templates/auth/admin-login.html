@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - DigiLib FPJ</title>
+    <link rel="stylesheet" th:href="@{/css/starry-bookshelf.css}">
+</head>
+<body class="admin-theme">
+<div class="starry-overlay"></div>
+<main class="login-stage">
+    <section class="bookshelf-card admin-card">
+        <h1 class="brand-title">DigiLib FPJ Admin</h1>
+        <p class="brand-subtitle">Inventory, Sales, and Supplier Control</p>
+        <h2 class="login-heading">Administrator Access</h2>
+        <form th:action="@{/admin/login}" method="post" class="login-form">
+            <label for="adminUsername">Admin Username</label>
+            <input id="adminUsername" name="username" type="text" required>
+
+            <label for="adminPassword">Admin Password</label>
+            <input id="adminPassword" name="password" type="password" required>
+
+            <button type="submit">Open Dashboard</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

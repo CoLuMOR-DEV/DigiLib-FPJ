@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Login - DigiLib FPJ</title>
+    <link rel="stylesheet" th:href="@{/css/starry-bookshelf.css}">
+</head>
+<body class="user-theme">
+<div class="starry-overlay"></div>
+<main class="login-stage">
+    <section class="bookshelf-card user-card">
+        <h1 class="brand-title">DigiLib FPJ</h1>
+        <p class="brand-subtitle">Bookstore POS and Digital Library</p>
+        <h2 class="login-heading">Reader Login</h2>
+        <form th:action="@{/login}" method="post" class="login-form">
+            <label for="username">Username</label>
+            <input id="username" name="username" type="text" required>
+
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" required>
+
+            <button type="submit">Enter Library</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>
