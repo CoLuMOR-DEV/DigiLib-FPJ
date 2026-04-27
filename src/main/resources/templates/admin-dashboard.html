@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - DigiLib FPJ</title>
+    <link rel="stylesheet" th:href="@{/css/modern-ui.css}">
+</head>
+<body>
+<nav class="navbar">
+    <div><strong>Admin Dashboard</strong></div>
+    <div class="nav-links">
+        <a class="nav-link" th:href="@{/}">Home</a>
+        <a class="nav-link" th:href="@{/login/admin}">Admin Login</a>
+    </div>
+    <button class="theme-toggle" type="button">Switch to Dark</button>
+</nav>
+<div class="sidebar-layout">
+    <aside class="sidebar">
+        <h3>Navigation</h3>
+        <div class="nav-links" style="flex-direction: column;">
+            <a class="nav-link" href="#">Metrics</a>
+            <a class="nav-link" href="#">Low Stock</a>
+            <a class="nav-link" href="#">Suppliers</a>
+        </div>
+    </aside>
+    <section class="dashboard-content">
+        <h1>Operational Overview</h1>
+        <div class="metrics-grid">
+            <article class="metric-card">
+                <h3>Total Books</h3>
+                <p th:text="${totalBooks}">0</p>
+            </article>
+            <article class="metric-card">
+                <h3>Total Suppliers</h3>
+                <p th:text="${totalSuppliers}">0</p>
+            </article>
+            <article class="metric-card">
+                <h3>Low Stock Alerts</h3>
+                <p th:text="${lowStockCount}">0</p>
+            </article>
+        </div>
+        <article class="metric-card alert-card">
+            <h3>Low Stock Items</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                <tr>
+                    <th style="text-align: left;">Book</th>
+                    <th style="text-align: left;">Current Stock</th>
+                    <th style="text-align: left;">Threshold</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="inventory : ${lowStockItems}">
+                    <td th:text="${inventory.book.title}">Book Name</td>
+                    <td th:text="${inventory.stockQty}">0</td>
+                    <td th:text="${inventory.lowAlertQty}">0</td>
+                </tr>
+                </tbody>
+            </table>
+        </article>
+    </section>
+</div>
+<script th:src="@{/js/theme-toggle.js}"></script>
+</body>
+</html>
