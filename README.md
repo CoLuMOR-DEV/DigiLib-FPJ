@@ -1,140 +1,171 @@
 # Bookstore POS System and Digital Library Website
 
-This project is a Spring Boot starter for a Bookstore POS and Digital Library platform with:
+## Technology Stack
 
-- Spring Web + Thymeleaf
-- Spring Data JPA + MySQL
-- Role-ready authentication foundation
-- Harvard Library API integration service
-- Checkout workflow with member discounts, inventory deduction, and `.txt` receipt output
-- Admin Supplier CRUD and low-stock alert query support
+- Backend: Java Spring Boot (Spring Web, Spring Data JPA, Spring Security, Thymeleaf)
+- Database: MySQL on localhost via XAMPP and phpMyAdmin
+- Frontend: HTML, CSS, JavaScript with Thymeleaf
+- External API: Harvard Library API via `RestTemplate`
 
-## 1. Prerequisites
+## Recommended Project Structure
 
-Install the following on your local machine:
+```text
+DigiLib-FPJ/
+├── README.md
+├── pom.xml
+├── docs/
+│   └── PROJECT_SETUP.md
+└── src/main/
+    ├── java/com/digilibfpj/pos/
+    │   ├── BookstorePosDigitalLibraryApplication.java
+    │   ├── config/
+    │   │   └── AppConfig.java
+    │   ├── controller/
+    │   │   ├── AuthViewController.java
+    │   │   ├── CheckoutController.java
+    │   │   └── SupplierAdminController.java
+    │   ├── dto/
+    │   │   ├── CheckoutItemRequest.java
+    │   │   ├── CheckoutRequest.java
+    │   │   └── CheckoutResponse.java
+    │   ├── entity/
+    │   │   ├── Book.java
+    │   │   ├── Customer.java
+    │   │   ├── Inventory.java
+    │   │   ├── OrderItem.java
+    │   │   ├── OrderLog.java
+    │   │   └── Supplier.java
+    │   ├── repository/
+    │   │   ├── BookRepository.java
+    │   │   ├── CustomerRepository.java
+    │   │   ├── InventoryRepository.java
+    │   │   ├── OrderItemRepository.java
+    │   │   ├── OrderLogRepository.java
+    │   │   └── SupplierRepository.java
+    │   └── service/
+    │       ├── AdminDashboardService.java
+    │       ├── CheckoutService.java
+    │       └── HarvardLibraryService.java
+    └── resources/
+        ├── application.properties
+        ├── static/
+        │   ├── css/modern-ui.css
+        │   └── js/theme-toggle.js
+        └── templates/
+            ├── admin-dashboard.html
+            ├── home.html
+            └── auth/
+                ├── admin-login.html
+                └── user-login.html
+```
+
+## Localhost Setup with XAMPP
+
+### 1. Install Required Tools
 
 - Java 17+
 - Maven 3.9+
-- MySQL 8+
-- Git
+- XAMPP with MySQL enabled
+- Browser
 
-Check installed versions:
+### 2. Create Database via phpMyAdmin
 
-```bash
-java -version
-mvn -version
-mysql --version
+1. Start **Apache** and **MySQL** from XAMPP Control Panel.
+2. Open `http://localhost/phpmyadmin`.
+3. Create a database named `digilib_fpj`.
+
+### 3. Default Local Database Configuration
+
+`src/main/resources/application.properties`
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/digilib_fpj?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=
+spring.jpa.hibernate.ddl-auto=update
 ```
 
-## 2. Clone and Enter the Project
+This setup is already configured in the project.
 
-```bash
-git clone <your-repository-url>
-cd DigiLib-FPJ
-```
-
-## 3. Create the Local MySQL Database
-
-Open MySQL and run:
-
-```sql
-CREATE DATABASE digilib_fpj;
-```
-
-You can keep using the database with Hibernate auto-update (`spring.jpa.hibernate.ddl-auto=update`) or run the full explicit schema from `docs/PROJECT_SETUP.md`.
-
-## 4. Configure Environment Variables for Localhost
-
-This application reads DB/API settings from environment variables.
-
-### macOS/Linux (bash/zsh)
-
-```bash
-export DB_URL="jdbc:mysql://localhost:3306/digilib_fpj?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
-export DB_USERNAME="root"
-export DB_PASSWORD="your_mysql_password"
-export PORT="8080"
-export HARVARD_API_BASE_URL="https://api.lib.harvard.edu/v2/items.json"
-export HARVARD_API_KEY=""
-export RECEIPT_OUTPUT_DIR="receipts"
-export MEMBER_DISCOUNT_PERCENTAGE="10"
-```
-
-### Windows PowerShell
-
-```powershell
-$env:DB_URL="jdbc:mysql://localhost:3306/digilib_fpj?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
-$env:DB_USERNAME="root"
-$env:DB_PASSWORD="your_mysql_password"
-$env:PORT="8080"
-$env:HARVARD_API_BASE_URL="https://api.lib.harvard.edu/v2/items.json"
-$env:HARVARD_API_KEY=""
-$env:RECEIPT_OUTPUT_DIR="receipts"
-$env:MEMBER_DISCOUNT_PERCENTAGE="10"
-```
-
-## 5. Start the Application
-
-From the project root:
+### 4. Run the Application
 
 ```bash
 mvn spring-boot:run
 ```
 
-If startup is successful, open:
+### 5. Open Pages
 
-- User login page: `http://localhost:8080/login/user`
-- Admin login page: `http://localhost:8080/login/admin`
+- Home: `http://localhost:8080/`
+- User Login: `http://localhost:8080/login/user`
+- Admin Login: `http://localhost:8080/login/admin`
+- Admin Dashboard: `http://localhost:8080/admin/dashboard`
 
-## 6. Interact with the App on Localhost
+## MySQL Schema Reference
 
-Because this is starter code, the easiest way to interact first is through REST endpoints plus the login pages.
+```sql
+CREATE TABLE customer (
+    customer_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(120) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(30) NOT NULL,
+    is_member BOOLEAN NOT NULL
+);
 
-### 6.1 Supplier Admin CRUD (REST)
+CREATE TABLE supplier (
+    supplier_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(180) NOT NULL,
+    contact_info VARCHAR(255)
+);
 
-Base URL:
+CREATE TABLE book (
+    book_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    isbn VARCHAR(20) NOT NULL UNIQUE,
+    title VARCHAR(255) NOT NULL,
+    author VARCHAR(180) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    supplier_id BIGINT NOT NULL,
+    CONSTRAINT fk_book_supplier FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id)
+);
 
-```text
-http://localhost:8080/api/admin/suppliers
+CREATE TABLE inventory (
+    inventory_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    book_id BIGINT NOT NULL UNIQUE,
+    stock_qty INT NOT NULL,
+    low_alert_qty INT NOT NULL,
+    CONSTRAINT fk_inventory_book FOREIGN KEY (book_id) REFERENCES book(book_id)
+);
+
+CREATE TABLE order_log (
+    order_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    customer_id BIGINT NOT NULL,
+    order_date DATETIME NOT NULL,
+    total_amount DECIMAL(12,2) NOT NULL,
+    CONSTRAINT fk_orderlog_customer FOREIGN KEY (customer_id) REFERENCES customer(customer_id)
+);
+
+CREATE TABLE order_item (
+    item_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    order_id BIGINT NOT NULL,
+    book_id BIGINT NOT NULL,
+    quantity INT NOT NULL,
+    CONSTRAINT fk_orderitem_orderlog FOREIGN KEY (order_id) REFERENCES order_log(order_id),
+    CONSTRAINT fk_orderitem_book FOREIGN KEY (book_id) REFERENCES book(book_id)
+);
 ```
 
-Create supplier:
+## Interacting with Key Features
+
+### Supplier CRUD
 
 ```bash
 curl -X POST http://localhost:8080/api/admin/suppliers \
   -H "Content-Type: application/json" \
-  -d '{"name":"Penguin Distribution","contactInfo":"penguin@example.com"}'
-```
+  -d '{"name":"Supplier A","contactInfo":"supplier-a@demo.com"}'
 
-List suppliers:
-
-```bash
 curl http://localhost:8080/api/admin/suppliers
 ```
 
-Update supplier:
-
-```bash
-curl -X PUT http://localhost:8080/api/admin/suppliers/1 \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Penguin Distribution Intl","contactInfo":"support@penguin.example"}'
-```
-
-Delete supplier:
-
-```bash
-curl -X DELETE http://localhost:8080/api/admin/suppliers/1
-```
-
-### 6.2 Checkout Endpoint (REST)
-
-Checkout URL:
-
-```text
-http://localhost:8080/api/checkout
-```
-
-Sample request:
+### Checkout and Receipt
 
 ```bash
 curl -X POST http://localhost:8080/api/checkout \
@@ -142,63 +173,35 @@ curl -X POST http://localhost:8080/api/checkout \
   -d '{
     "customerId": 1,
     "items": [
-      {"bookId": 1, "quantity": 2},
-      {"bookId": 2, "quantity": 1}
+      {"bookId": 1, "quantity": 2}
     ]
   }'
 ```
 
-On successful checkout:
+Successful checkout will:
 
-- `order_log` and `order_item` records are inserted
-- `inventory.stock_qty` is deducted
-- a receipt text file is written to `RECEIPT_OUTPUT_DIR` (default: `receipts/`)
+- deduct stock in `inventory`
+- write order data to `order_log` and `order_item`
+- generate a receipt file under `receipts/`
 
-## 7. Optional Local Seed Data
+### Harvard Library Search Integration Flow
 
-Use this as a quick bootstrap in MySQL to test checkout:
+- search locally by title/author with `BookRepository`
+- call Harvard Library API for additional bibliographic data
+- merge local and external results in `HarvardLibraryService`
 
-```sql
-INSERT INTO customer (username, password, role, is_member)
-VALUES ('reader1', 'plain-password-change-me', 'USER', true);
+## UI/UX Theme Notes
 
-INSERT INTO supplier (name, contact_info)
-VALUES ('Vintage House Supply', 'vintage-house@example.com');
+The UI uses a modern minimalist design with:
 
-INSERT INTO book (isbn, title, author, price, supplier_id)
-VALUES ('9780140449136', 'The Odyssey', 'Homer', 19.99, 1);
+- responsive cards and clean spacing
+- sleek sans-serif typography
+- subtle hover transitions and elevated surfaces
+- Dark/Light mode toggle in the navbar on all major pages
+- persisted theme preference using `localStorage`
 
-INSERT INTO inventory (book_id, stock_qty, low_alert_qty)
-VALUES (1, 25, 5);
-```
+## Dark/Light Mode Implementation
 
-## 8. Troubleshooting
-
-### Application fails on DB connection
-
-- Verify MySQL is running
-- Verify `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD`
-- Verify database `digilib_fpj` exists
-
-### Port already in use
-
-Set another port before starting:
-
-```bash
-export PORT=8081
-mvn spring-boot:run
-```
-
-### No receipt file generated
-
-- Verify checkout completed successfully
-- Verify process has write permissions to `RECEIPT_OUTPUT_DIR`
-
-## 9. Notes for Next Steps
-
-Recommended additions for a production-ready localhost experience:
-
-- Add Spring Security config with encoded passwords and role-based route protection
-- Add Flyway/Liquibase migrations
-- Add a Home/Landing page and Admin Dashboard Thymeleaf views
-- Add unit and integration tests for checkout, inventory deduction, and supplier CRUD
+- CSS variables for both themes: `src/main/resources/static/css/modern-ui.css`
+- JavaScript toggle and persistence: `src/main/resources/static/js/theme-toggle.js`
+- toggle button exists in user login, admin login, home, and admin dashboard templates

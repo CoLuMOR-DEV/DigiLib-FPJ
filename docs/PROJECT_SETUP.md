@@ -1,120 +1,59 @@
-# Bookstore POS System and Digital Library Website
+# Project Setup Blueprint
 
-## Recommended Project Structure
+## Architecture
 
-```text
-bookstore-pos-digital-library/
-├── pom.xml
-├── src/
-│   ├── main/
-│   │   ├── java/com/digilibfpj/pos/
-│   │   │   ├── BookstorePosDigitalLibraryApplication.java
-│   │   │   ├── config/
-│   │   │   │   └── AppConfig.java
-│   │   │   ├── controller/
-│   │   │   │   ├── AuthViewController.java
-│   │   │   │   ├── CheckoutController.java
-│   │   │   │   └── SupplierAdminController.java
-│   │   │   ├── dto/
-│   │   │   │   ├── CheckoutItemRequest.java
-│   │   │   │   ├── CheckoutRequest.java
-│   │   │   │   └── CheckoutResponse.java
-│   │   │   ├── entity/
-│   │   │   │   ├── Book.java
-│   │   │   │   ├── Customer.java
-│   │   │   │   ├── Inventory.java
-│   │   │   │   ├── OrderItem.java
-│   │   │   │   ├── OrderLog.java
-│   │   │   │   └── Supplier.java
-│   │   │   ├── repository/
-│   │   │   │   ├── BookRepository.java
-│   │   │   │   ├── CustomerRepository.java
-│   │   │   │   ├── InventoryRepository.java
-│   │   │   │   ├── OrderItemRepository.java
-│   │   │   │   ├── OrderLogRepository.java
-│   │   │   │   └── SupplierRepository.java
-│   │   │   └── service/
-│   │   │       ├── AdminDashboardService.java
-│   │   │       ├── CheckoutService.java
-│   │   │       └── HarvardLibraryService.java
-│   │   └── resources/
-│   │       ├── application.properties
-│   │       ├── static/css/starry-bookshelf.css
-│   │       └── templates/auth/
-│   │           ├── admin-login.html
-│   │           └── user-login.html
-└── docs/
-    └── PROJECT_SETUP.md
-```
+- Presentation Layer: Thymeleaf templates + CSS + JavaScript
+- Business Layer: Spring `@Service` components
+- Data Layer: Spring Data JPA repositories with MySQL
 
-## MySQL Schema
+## Local XAMPP Configuration
 
-```sql
-CREATE TABLE customer (
-    customer_id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    username VARCHAR(120) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    role VARCHAR(30) NOT NULL,
-    is_member BOOLEAN NOT NULL
-);
+Use XAMPP MySQL with:
 
-CREATE TABLE supplier (
-    supplier_id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(180) NOT NULL,
-    contact_info VARCHAR(255)
-);
+- Host: `localhost`
+- Port: `3306`
+- Database: `digilib_fpj`
+- Username: `root`
+- Password: empty
 
-CREATE TABLE book (
-    book_id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    isbn VARCHAR(20) NOT NULL UNIQUE,
-    title VARCHAR(255) NOT NULL,
-    author VARCHAR(180) NOT NULL,
-    price DECIMAL(10,2) NOT NULL,
-    supplier_id BIGINT NOT NULL,
-    CONSTRAINT fk_book_supplier FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id)
-);
+`application.properties` is already configured for this setup.
 
-CREATE TABLE inventory (
-    inventory_id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    book_id BIGINT NOT NULL UNIQUE,
-    stock_qty INT NOT NULL,
-    low_alert_qty INT NOT NULL,
-    CONSTRAINT fk_inventory_book FOREIGN KEY (book_id) REFERENCES book(book_id)
-);
+## JPA Entity Focus: OrderLog and OrderItem
 
-CREATE TABLE order_log (
-    order_id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    customer_id BIGINT NOT NULL,
-    order_date DATETIME NOT NULL,
-    total_amount DECIMAL(12,2) NOT NULL,
-    CONSTRAINT fk_orderlog_customer FOREIGN KEY (customer_id) REFERENCES customer(customer_id)
-);
+`OrderLog`
 
-CREATE TABLE order_item (
-    item_id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    order_id BIGINT NOT NULL,
-    book_id BIGINT NOT NULL,
-    quantity INT NOT NULL,
-    CONSTRAINT fk_orderitem_orderlog FOREIGN KEY (order_id) REFERENCES order_log(order_id),
-    CONSTRAINT fk_orderitem_book FOREIGN KEY (book_id) REFERENCES book(book_id)
-);
-```
+- `order_id` primary key
+- `customer_id` foreign key to `customer`
+- `order_date` timestamp
+- `total_amount` decimal
+- one-to-many relationship with `OrderItem`
 
-## Cloud Environment Variables
+`OrderItem`
 
-- DB_URL
-- DB_USERNAME
-- DB_PASSWORD
-- PORT
-- HARVARD_API_BASE_URL
-- HARVARD_API_KEY
-- RECEIPT_OUTPUT_DIR
-- MEMBER_DISCOUNT_PERCENTAGE
+- `item_id` primary key
+- `order_id` foreign key to `order_log`
+- `book_id` foreign key to `book`
+- `quantity` integer
 
-## Architecture Notes
+## Service Responsibilities
 
-- Authentication can be mapped with Spring Security and role-based URL access for USER and ADMIN.
-- Catalog search should first query `BookRepository`, then merge with Harvard Library API records.
-- Checkout workflow must run in one transaction to ensure order creation and inventory deduction stay consistent.
-- Supplier CRUD endpoints are under `/api/admin/suppliers`.
-- Low-stock alert data source is `InventoryRepository.findLowStockItems()`.
+`CheckoutService`
+
+- validates customer and cart items
+- checks and deducts stock quantity
+- applies percentage member discount
+- writes `order_log` and `order_item` records
+- generates `.txt` receipt file in local `receipts/` directory
+
+`HarvardLibraryService`
+
+- local-first search by title and author
+- external Harvard API fetch via `RestTemplate`
+- response payload containing both local and external data
+
+## UI Theme Implementation
+
+- minimalist responsive layout
+- dark/light mode with CSS variables
+- navbar toggle available on main pages
+- `localStorage` persistence for theme state

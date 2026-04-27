@@ -4,25 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - DigiLib FPJ</title>
-    <link rel="stylesheet" th:href="@{/css/starry-bookshelf.css}">
+    <link rel="stylesheet" th:href="@{/css/modern-ui.css}">
 </head>
-<body class="admin-theme">
-<div class="starry-overlay"></div>
-<main class="login-stage">
-    <section class="bookshelf-card admin-card">
-        <h1 class="brand-title">DigiLib FPJ Admin</h1>
-        <p class="brand-subtitle">Inventory, Sales, and Supplier Control</p>
-        <h2 class="login-heading">Administrator Access</h2>
-        <form th:action="@{/admin/login}" method="post" class="login-form">
-            <label for="adminUsername">Admin Username</label>
-            <input id="adminUsername" name="username" type="text" required>
-
-            <label for="adminPassword">Admin Password</label>
-            <input id="adminPassword" name="password" type="password" required>
-
-            <button type="submit">Open Dashboard</button>
+<body>
+<nav class="navbar">
+    <div><strong>DigiLib FPJ Admin</strong></div>
+    <div class="nav-links">
+        <a class="nav-link" th:href="@{/}">Home</a>
+        <a class="nav-link" th:href="@{/login/user}">User Login</a>
+    </div>
+    <button class="theme-toggle" type="button">Switch to Dark</button>
+</nav>
+<main class="center-stage">
+    <section class="login-card admin-login-card">
+        <h1 class="login-title">Administrator Access</h1>
+        <p class="login-subtitle">Manage suppliers, inventory, and dashboard alerts.</p>
+        <form th:action="@{/admin/login}" method="post" class="form-grid">
+            <input class="text-input" type="text" id="adminUsername" name="username" placeholder="Admin Username" required>
+            <input class="text-input" type="password" id="adminPassword" name="password" placeholder="Admin Password" required>
+            <button class="primary-button admin-button" type="submit">Open Dashboard</button>
         </form>
     </section>
 </main>
+<script th:src="@{/js/theme-toggle.js}"></script>
 </body>
 </html>
