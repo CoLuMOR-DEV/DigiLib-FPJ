@@ -10,14 +10,16 @@
 <nav class="navbar">
     <div><strong>DigiLib FPJ</strong></div>
     <div class="nav-links">
+        <a class="nav-link" th:href="@{/signup}">Sign Up</a>
         <a class="nav-link" th:href="@{/login/user}">User Login</a>
         <a class="nav-link" th:href="@{/login/admin}">Admin Login</a>
+        <a class="nav-link" th:href="@{/logout}">Logout</a>
     </div>
     <button class="theme-toggle" type="button">Switch to Dark</button>
 </nav>
 <section class="page-wrap">
-    <h1>Inventory Catalog</h1>
-    <p class="login-subtitle">Modern responsive book cards for your landing page concept.</p>
+    <h1>Public Catalog</h1>
+    <p class="login-subtitle">Anyone can browse books without logging in.</p>
     <div class="book-grid">
         <article class="book-card" th:each="book : ${books}">
             <h3 th:text="${book.title}">Book Title</h3>

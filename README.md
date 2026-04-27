@@ -258,3 +258,31 @@ Use one of these actions:
 - Restart VS Code window
 
 The Red Hat Dependency Analytics message for `mysql-connector-j` in this project is informational in this setup and does not block build/run.
+
+
+## Admin Credentials
+
+Default admin account is auto-created on startup:
+
+- Username: `admin`
+- Password: `admin123`
+
+These values come from `application.properties`:
+
+```properties
+admin.default.username=admin
+admin.default.password=admin123
+```
+
+To change admin credentials:
+
+1. Edit those two values in `src/main/resources/application.properties`.
+2. If the old admin user already exists in database, update its password in `customer` table using BCrypt hash or delete that row and restart the app so it recreates with new values.
+
+## Access Model
+
+- Public users can open Home and browse the catalog without signing in.
+- New users can create an account at `/signup`.
+- User login page: `/login/user`.
+- Admin login page: `/login/admin`.
+- Admin dashboard requires ADMIN role.

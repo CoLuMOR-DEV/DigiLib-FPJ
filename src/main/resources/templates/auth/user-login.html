@@ -11,6 +11,7 @@
     <div><strong>DigiLib FPJ</strong></div>
     <div class="nav-links">
         <a class="nav-link" th:href="@{/}">Home</a>
+        <a class="nav-link" th:href="@{/signup}">Sign Up</a>
         <a class="nav-link" th:href="@{/login/admin}">Admin</a>
     </div>
     <button class="theme-toggle" type="button">Switch to Dark</button>
@@ -19,6 +20,8 @@
     <section class="login-card">
         <h1 class="login-title">Welcome Back</h1>
         <p class="login-subtitle">Log in to browse books and complete purchases.</p>
+        <p class="login-subtitle" th:if="${param.registered}">Registration successful. Please log in.</p>
+        <p class="login-subtitle" th:if="${param.error}">Invalid username or password.</p>
         <form th:action="@{/login}" method="post" class="form-grid">
             <input class="text-input" type="text" id="username" name="username" placeholder="Username" required>
             <input class="text-input" type="password" id="password" name="password" placeholder="Password" required>

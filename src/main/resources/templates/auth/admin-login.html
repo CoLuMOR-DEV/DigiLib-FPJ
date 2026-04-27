@@ -11,6 +11,7 @@
     <div><strong>DigiLib FPJ Admin</strong></div>
     <div class="nav-links">
         <a class="nav-link" th:href="@{/}">Home</a>
+        <a class="nav-link" th:href="@{/signup}">User Sign Up</a>
         <a class="nav-link" th:href="@{/login/user}">User Login</a>
     </div>
     <button class="theme-toggle" type="button">Switch to Dark</button>
@@ -18,8 +19,9 @@
 <main class="center-stage">
     <section class="login-card admin-login-card">
         <h1 class="login-title">Administrator Access</h1>
-        <p class="login-subtitle">Manage suppliers, inventory, and dashboard alerts.</p>
-        <form th:action="@{/admin/login}" method="post" class="form-grid">
+        <p class="login-subtitle">Use admin credentials to open dashboard.</p>
+        <p class="login-subtitle">Default: admin / admin123</p>
+        <form th:action="@{/login}" method="post" class="form-grid">
             <input class="text-input" type="text" id="adminUsername" name="username" placeholder="Admin Username" required>
             <input class="text-input" type="password" id="adminPassword" name="password" placeholder="Admin Password" required>
             <button class="primary-button admin-button" type="submit">Open Dashboard</button>

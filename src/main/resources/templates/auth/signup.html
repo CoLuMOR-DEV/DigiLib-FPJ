@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - DigiLib FPJ</title>
+    <link rel="stylesheet" th:href="@{/css/modern-ui.css}">
+</head>
+<body>
+<nav class="navbar">
+    <div><strong>DigiLib FPJ</strong></div>
+    <div class="nav-links">
+        <a class="nav-link" th:href="@{/}">Home</a>
+        <a class="nav-link" th:href="@{/login/user}">Login</a>
+    </div>
+    <button class="theme-toggle" type="button">Switch to Dark</button>
+</nav>
+<main class="center-stage">
+    <section class="login-card">
+        <h1 class="login-title">Create Account</h1>
+        <p class="login-subtitle">Sign up to checkout and track your library purchases.</p>
+        <p class="login-subtitle" th:if="${errorMessage}" th:text="${errorMessage}">Username already exists</p>
+        <form th:action="@{/register}" method="post" class="form-grid">
+            <input class="text-input" type="text" id="username" name="username" placeholder="Choose Username" required>
+            <input class="text-input" type="password" id="password" name="password" placeholder="Choose Password" required>
+            <label>
+                <input type="checkbox" name="isMember" value="true">
+                Register as member
+            </label>
+            <button class="primary-button" type="submit">Create Account</button>
+        </form>
+    </section>
+</main>
+<script th:src="@{/js/theme-toggle.js}"></script>
+</body>
+</html>
