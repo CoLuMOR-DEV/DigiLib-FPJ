@@ -3,6 +3,9 @@ package com.digilibfpj.pos.service;
 import com.digilibfpj.pos.entity.Book;
 import com.digilibfpj.pos.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -38,7 +41,15 @@ public class HarvardLibraryService {
                 .queryParam("apikey", harvardApiKey)
                 .toUriString();
 
-        Map harvardApiResponse = restTemplate.getForObject(url, Map.class);
+        ResponseEntity<Map<String, Object>> harvardResponseEntity = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Map<String, Object>>() {
+                }
+        );
+
+        Map<String, Object> harvardApiResponse = harvardResponseEntity.getBody();
         response.put("harvardRecords", harvardApiResponse);
         return response;
     }

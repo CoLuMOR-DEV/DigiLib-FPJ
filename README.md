@@ -245,3 +245,16 @@ You can run local defaults with:
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\run-local.ps1
 ```
+
+
+## VS Code Diagnostics Clarification
+
+If VS Code shows `The build file has been changed and may need reload to make it effective`, this is an IDE refresh notice.
+
+Use one of these actions:
+
+- Command Palette -> `Java: Clean Java Language Server Workspace`
+- Command Palette -> `Maven: Reload project`
+- Restart VS Code window
+
+The Red Hat Dependency Analytics message for `mysql-connector-j` in this project is informational in this setup and does not block build/run.
