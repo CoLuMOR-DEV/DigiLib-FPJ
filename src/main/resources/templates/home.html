@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Catalog - DigiLib FPJ</title>
+    <link rel="stylesheet" th:href="@{/css/modern-ui.css}">
+</head>
+<body>
+<nav class="navbar">
+    <div><strong>DigiLib FPJ</strong></div>
+    <div class="nav-links">
+        <a class="nav-link" th:href="@{/login/user}">User Login</a>
+        <a class="nav-link" th:href="@{/login/admin}">Admin Login</a>
+    </div>
+    <button class="theme-toggle" type="button">Switch to Dark</button>
+</nav>
+<section class="page-wrap">
+    <h1>Inventory Catalog</h1>
+    <p class="login-subtitle">Modern responsive book cards for your landing page concept.</p>
+    <div class="book-grid">
+        <article class="book-card" th:each="book : ${books}">
+            <h3 th:text="${book.title}">Book Title</h3>
+            <p th:text="${book.author}">Author</p>
+            <p><strong th:text="${book.price}">0.00</strong></p>
+        </article>
+    </div>
+</section>
+<script th:src="@{/js/theme-toggle.js}"></script>
+</body>
+</html>
