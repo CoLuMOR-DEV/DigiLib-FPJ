@@ -43,6 +43,8 @@ public class BookstorePOSApp extends JFrame {
     private JButton removeFromCartBtn;
     private JButton assignSupplierBtn;
     private JButton checkoutBtn;
+    private JButton addBookBtn;
+    private JButton restockBtn;
     private JComboBox<String> themeCombo;
 
     public BookstorePOSApp() {
@@ -65,11 +67,11 @@ public class BookstorePOSApp extends JFrame {
     private void applyTheme(ThemeMode mode) {
         currentTheme = mode;
         if (mode == ThemeMode.DARK) {
-            bg = new Color(18, 18, 20);
-            card = new Color(30, 30, 34);
-            text = new Color(235, 235, 240);
-            inputBg = new Color(42, 42, 48);
-            accent = new Color(10, 132, 255);
+            bg = new Color(22, 24, 28);
+            card = new Color(36, 39, 45);
+            text = new Color(245, 247, 250);
+            inputBg = new Color(48, 52, 60);
+            accent = new Color(64, 156, 255);
         } else {
             bg = new Color(245, 245, 247);
             card = Color.WHITE;
@@ -191,10 +193,18 @@ public class BookstorePOSApp extends JFrame {
         assignSupplierBtn = new JButton("Assign Supplier to Book");
         styleButton(assignSupplierBtn);
         assignSupplierBtn.addActionListener(e -> assignSupplier());
+        addBookBtn = new JButton("Add New Book");
+        styleButton(addBookBtn);
+        addBookBtn.addActionListener(e -> addNewBook());
+        restockBtn = new JButton("Restock Selected Book");
+        styleButton(restockBtn);
+        restockBtn.addActionListener(e -> restockSelectedBook());
 
         panel.add(addToCartBtn);
         panel.add(removeFromCartBtn);
         panel.add(assignSupplierBtn);
+        panel.add(addBookBtn);
+        panel.add(restockBtn);
         panel.add(checkoutBtn);
         return panel;
     }
@@ -221,8 +231,11 @@ public class BookstorePOSApp extends JFrame {
     private void styleButton(JButton button) {
         button.setFocusPainted(false);
         button.setOpaque(true);
+        button.setContentAreaFilled(true);
+        button.setBorderPainted(false);
         button.setBorder(BorderFactory.createEmptyBorder(10, 14, 10, 14));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setFont(button.getFont().deriveFont(Font.BOLD, 13f));
     }
 
     private void applyThemeToComponents() {
@@ -244,13 +257,70 @@ public class BookstorePOSApp extends JFrame {
         cartTable.setBackground(inputBg);
         cartTable.setForeground(text);
 
-        for (JButton button : new JButton[]{searchBtn, resetBtn, addToCartBtn, removeFromCartBtn, assignSupplierBtn, checkoutBtn}) {
+        for (JButton button : new JButton[]{searchBtn, resetBtn, addToCartBtn, removeFromCartBtn, assignSupplierBtn, addBookBtn, restockBtn, checkoutBtn}) {
             if (button == null) continue;
             button.setBackground(accent);
             button.setForeground(Color.WHITE);
+            button.setEnabled(true);
         }
 
         repaint();
+    }
+
+    private void addNewBook() {
+        JTextField idField = new JTextField();
+        JTextField titleField = new JTextField();
+        JTextField authorField = new JTextField();
+        JTextField priceField = new JTextField();
+        JTextField stockField = new JTextField();
+        Supplier supplier = (Supplier) JOptionPane.showInputDialog(this, "Supplier", "Supplier",
+                JOptionPane.PLAIN_MESSAGE, null, suppliers.toArray(), suppliers.get(0));
+        if (supplier == null) return;
+
+        JPanel panel = new JPanel(new GridLayout(0, 1, 6, 6));
+        panel.add(new JLabel("Book ID (e.g. B006)")); panel.add(idField);
+        panel.add(new JLabel("Title")); panel.add(titleField);
+        panel.add(new JLabel("Author")); panel.add(authorField);
+        panel.add(new JLabel("Price")); panel.add(priceField);
+        panel.add(new JLabel("Initial Stock")); panel.add(stockField);
+
+        int result = JOptionPane.showConfirmDialog(this, panel, "Add New Book", JOptionPane.OK_CANCEL_OPTION);
+        if (result != JOptionPane.OK_OPTION) return;
+        try {
+            String id = idField.getText().trim();
+            String title = titleField.getText().trim();
+            String author = authorField.getText().trim();
+            double price = Double.parseDouble(priceField.getText().trim());
+            int stock = Integer.parseInt(stockField.getText().trim());
+            if (id.isBlank() || title.isBlank() || author.isBlank() || stock < 0 || price < 0) throw new IllegalArgumentException();
+            inventory.addBook(new Book(id, title, author, price, stock, supplier));
+            refreshInventoryTable(inventory.getAllBooks());
+            refreshLowStockDashboard();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Invalid input. Please enter valid values.");
+        }
+    }
+
+    private void restockSelectedBook() {
+        int row = inventoryTable.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(this, "Select a book to restock.");
+            return;
+        }
+        String bookId = String.valueOf(inventoryModel.getValueAt(row, 0));
+        Book book = inventory.getAllBooks().stream().filter(b -> b.getId().equals(bookId)).findFirst().orElse(null);
+        if (book == null) return;
+        String qty = JOptionPane.showInputDialog(this, "Enter quantity to add:", "Restock " + book.getTitle(), JOptionPane.PLAIN_MESSAGE);
+        if (qty == null) return;
+        try {
+            int addQty = Integer.parseInt(qty.trim());
+            if (addQty <= 0) throw new IllegalArgumentException();
+            book.setStock(book.getStock() + addQty);
+            refreshInventoryTable(inventory.getAllBooks());
+            refreshLowStockDashboard();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid positive number.");
+        }
     }
 
     private void addSelectedBookToCart() {

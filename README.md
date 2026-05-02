@@ -7,9 +7,9 @@ A functioning Bookstore POS desktop application with a modern Apple-inspired GUI
 - Login (`admin` / `book123`)
 - Search books by title or author
 - Add to cart and remove from cart
-- Stock tracking (updates in real time)
+- Stock tracking (updates in real time) + manual restock for selected books
 - Membership discount (10%)
-- Supplier management (assign supplier to selected book)
+- Add new books and assign suppliers during creation
 - Low-stock alert dashboard
 - Receipt printing as `.txt` files in `receipts/`
 
