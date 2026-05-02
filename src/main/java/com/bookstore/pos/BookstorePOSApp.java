@@ -12,10 +12,14 @@ import java.util.List;
 import java.util.UUID;
 
 public class BookstorePOSApp extends JFrame {
-    private static final Color BG = new Color(245, 245, 247);
-    private static final Color CARD = Color.WHITE;
-    private static final Color ACCENT = new Color(0, 122, 255);
-    private static final Color TEXT = new Color(28, 28, 30);
+    private enum ThemeMode { LIGHT, DARK }
+
+    private ThemeMode currentTheme = ThemeMode.LIGHT;
+    private Color bg = new Color(245, 245, 247);
+    private Color card = Color.WHITE;
+    private Color text = new Color(28, 28, 30);
+    private Color inputBg = Color.WHITE;
+    private Color accent = new Color(0, 122, 255);
     private final Inventory inventory = new Inventory(5);
     private final List<Supplier> suppliers = new ArrayList<>();
     private final List<CartItem> cart = new ArrayList<>();
@@ -32,6 +36,14 @@ public class BookstorePOSApp extends JFrame {
     private JTextField customerNameField;
     private JCheckBox memberCheck;
     private JLabel totalLabel;
+    private JPanel rootPanel;
+    private JButton searchBtn;
+    private JButton resetBtn;
+    private JButton addToCartBtn;
+    private JButton removeFromCartBtn;
+    private JButton assignSupplierBtn;
+    private JButton checkoutBtn;
+    private JComboBox<String> themeCombo;
 
     public BookstorePOSApp() {
         setupSampleData();
@@ -47,20 +59,24 @@ public class BookstorePOSApp extends JFrame {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ignored) {}
-        UIManager.put("Panel.background", BG);
-        UIManager.put("Label.foreground", TEXT);
-        UIManager.put("TextField.background", Color.WHITE);
-        UIManager.put("TextField.foreground", TEXT);
-        UIManager.put("TextField.caretForeground", TEXT);
-        UIManager.put("Button.background", ACCENT);
-        UIManager.put("Button.foreground", Color.WHITE);
-        UIManager.put("Table.background", Color.WHITE);
-        UIManager.put("Table.foreground", TEXT);
-        UIManager.put("Table.selectionBackground", new Color(219, 235, 255));
-        UIManager.put("Table.selectionForeground", TEXT);
-        UIManager.put("Table.gridColor", new Color(229, 229, 234));
-        UIManager.put("TextArea.background", Color.WHITE);
-        UIManager.put("TextArea.foreground", TEXT);
+        applyTheme(ThemeMode.LIGHT);
+    }
+
+    private void applyTheme(ThemeMode mode) {
+        currentTheme = mode;
+        if (mode == ThemeMode.DARK) {
+            bg = new Color(18, 18, 20);
+            card = new Color(30, 30, 34);
+            text = new Color(235, 235, 240);
+            inputBg = new Color(42, 42, 48);
+            accent = new Color(10, 132, 255);
+        } else {
+            bg = new Color(245, 245, 247);
+            card = Color.WHITE;
+            text = new Color(28, 28, 30);
+            inputBg = Color.WHITE;
+            accent = new Color(0, 122, 255);
+        }
     }
 
     private void buildUi() {
@@ -69,15 +85,15 @@ public class BookstorePOSApp extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        JPanel root = new JPanel(new BorderLayout(12, 12));
-        root.setBackground(BG);
-        root.setBorder(new EmptyBorder(16, 16, 16, 16));
-        setContentPane(root);
+        rootPanel = new JPanel(new BorderLayout(12, 12));
+        rootPanel.setBorder(new EmptyBorder(16, 16, 16, 16));
+        setContentPane(rootPanel);
 
-        root.add(buildTopPanel(), BorderLayout.NORTH);
-        root.add(buildCenterPanel(), BorderLayout.CENTER);
-        root.add(buildRightPanel(), BorderLayout.EAST);
-        root.add(buildBottomPanel(), BorderLayout.SOUTH);
+        rootPanel.add(buildTopPanel(), BorderLayout.NORTH);
+        rootPanel.add(buildCenterPanel(), BorderLayout.CENTER);
+        rootPanel.add(buildRightPanel(), BorderLayout.EAST);
+        rootPanel.add(buildBottomPanel(), BorderLayout.SOUTH);
+        applyThemeToComponents();
     }
 
     private JPanel buildTopPanel() {
@@ -89,9 +105,11 @@ public class BookstorePOSApp extends JFrame {
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         searchField = new JTextField(20);
         JButton searchBtn = new JButton("Search");
+        this.searchBtn = searchBtn;
         styleButton(searchBtn);
         searchBtn.addActionListener(e -> refreshInventoryTable(inventory.searchByTitleOrAuthor(searchField.getText())));
         JButton resetBtn = new JButton("Reset");
+        this.resetBtn = resetBtn;
         styleButton(resetBtn);
         resetBtn.addActionListener(e -> {
             searchField.setText("");
@@ -101,6 +119,13 @@ public class BookstorePOSApp extends JFrame {
         searchPanel.add(searchField);
         searchPanel.add(searchBtn);
         searchPanel.add(resetBtn);
+        themeCombo = new JComboBox<>(new String[]{"Light", "Dark"});
+        themeCombo.addActionListener(e -> {
+            applyTheme(themeCombo.getSelectedIndex() == 1 ? ThemeMode.DARK : ThemeMode.LIGHT);
+            applyThemeToComponents();
+        });
+        searchPanel.add(new JLabel("Theme:"));
+        searchPanel.add(themeCombo);
         panel.add(searchPanel, BorderLayout.EAST);
         return panel;
     }
@@ -131,7 +156,7 @@ public class BookstorePOSApp extends JFrame {
         customerNameField = new JTextField("Walk-in Customer");
         memberCheck = new JCheckBox("Membership Discount (10%)");
         memberCheck.addActionListener(e -> refreshCartTable());
-        memberCheck.setForeground(TEXT);
+        memberCheck.setForeground(text);
         memberCheck.setOpaque(false);
         customerPanel.add(new JLabel("Customer Name"));
         customerPanel.add(customerNameField);
@@ -154,23 +179,23 @@ public class BookstorePOSApp extends JFrame {
 
     private JPanel buildActionsPanel() {
         JPanel panel = new JPanel(new GridLayout(0, 1, 8, 8));
-        JButton addToCart = new JButton("Add Selected Book to Cart");
-        styleButton(addToCart);
-        addToCart.addActionListener(e -> addSelectedBookToCart());
-        JButton removeFromCart = new JButton("Remove Selected Cart Item");
-        styleButton(removeFromCart);
-        removeFromCart.addActionListener(e -> removeSelectedCartItem());
-        JButton checkout = new JButton("Checkout & Save Receipt");
-        styleButton(checkout);
-        checkout.addActionListener(e -> checkout());
-        JButton manageSupplier = new JButton("Assign Supplier to Book");
-        styleButton(manageSupplier);
-        manageSupplier.addActionListener(e -> assignSupplier());
+        addToCartBtn = new JButton("Add Selected Book to Cart");
+        styleButton(addToCartBtn);
+        addToCartBtn.addActionListener(e -> addSelectedBookToCart());
+        removeFromCartBtn = new JButton("Remove Selected Cart Item");
+        styleButton(removeFromCartBtn);
+        removeFromCartBtn.addActionListener(e -> removeSelectedCartItem());
+        checkoutBtn = new JButton("Checkout & Save Receipt");
+        styleButton(checkoutBtn);
+        checkoutBtn.addActionListener(e -> checkout());
+        assignSupplierBtn = new JButton("Assign Supplier to Book");
+        styleButton(assignSupplierBtn);
+        assignSupplierBtn.addActionListener(e -> assignSupplier());
 
-        panel.add(addToCart);
-        panel.add(removeFromCart);
-        panel.add(manageSupplier);
-        panel.add(checkout);
+        panel.add(addToCartBtn);
+        panel.add(removeFromCartBtn);
+        panel.add(assignSupplierBtn);
+        panel.add(checkoutBtn);
         return panel;
     }
 
@@ -184,9 +209,9 @@ public class BookstorePOSApp extends JFrame {
 
     private JPanel wrap(String title, JComponent content) {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(CARD);
+        panel.setBackground(card);
         panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(229, 229, 234)),
+                BorderFactory.createLineBorder(currentTheme == ThemeMode.DARK ? new Color(72, 72, 80) : new Color(229, 229, 234)),
                 BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), title)
         ));
         panel.add(content, BorderLayout.CENTER);
@@ -195,8 +220,37 @@ public class BookstorePOSApp extends JFrame {
 
     private void styleButton(JButton button) {
         button.setFocusPainted(false);
+        button.setOpaque(true);
         button.setBorder(BorderFactory.createEmptyBorder(10, 14, 10, 14));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    }
+
+    private void applyThemeToComponents() {
+        rootPanel.setBackground(bg);
+        getContentPane().setBackground(bg);
+
+        searchField.setBackground(inputBg);
+        searchField.setForeground(text);
+        customerNameField.setBackground(inputBg);
+        customerNameField.setForeground(text);
+        memberCheck.setForeground(text);
+        lowStockArea.setBackground(inputBg);
+        lowStockArea.setForeground(text);
+        supplierArea.setBackground(inputBg);
+        supplierArea.setForeground(text);
+
+        inventoryTable.setBackground(inputBg);
+        inventoryTable.setForeground(text);
+        cartTable.setBackground(inputBg);
+        cartTable.setForeground(text);
+
+        for (JButton button : new JButton[]{searchBtn, resetBtn, addToCartBtn, removeFromCartBtn, assignSupplierBtn, checkoutBtn}) {
+            if (button == null) continue;
+            button.setBackground(accent);
+            button.setForeground(Color.WHITE);
+        }
+
+        repaint();
     }
 
     private void addSelectedBookToCart() {

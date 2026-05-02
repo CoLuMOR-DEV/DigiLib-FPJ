@@ -3,7 +3,7 @@
 A functioning Bookstore POS desktop application with a modern Apple-inspired GUI theme.
 
 ## Features Implemented
-- Apple-style light UI (clean cards, soft borders, system look-and-feel)
+- Apple-style UI with light/dark mode toggle, clean cards, and iOS-inspired accent styling
 - Login (`admin` / `book123`)
 - Search books by title or author
 - Add to cart and remove from cart
